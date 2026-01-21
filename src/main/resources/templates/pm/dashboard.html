@@ -1,0 +1,226 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bảng Điều Khiển PM</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <style>
+            :root {
+                --primary-color: #2563eb;
+                --secondary-color: #1e40af;
+                --success-color: #059669;
+                --warning-color: #d97706;
+                --light-bg: #f8fafc;
+                --border-color: #e2e8f0;
+            }
+
+            body {
+                background-color: var(--light-bg);
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .navbar-custom {
+                background: linear-gradient(135deg, var(--warning-color) 0%, #b45309 100%);
+                box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
+            }
+
+            .header-section {
+                background: linear-gradient(135deg, var(--warning-color) 0%, #b45309 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 12px;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
+            }
+
+            .header-section h1 {
+                margin: 0;
+                font-weight: 700;
+                font-size: 2rem;
+            }
+
+            .table-card {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                overflow: hidden;
+                margin-bottom: 2rem;
+            }
+
+            .table-card thead {
+                background: linear-gradient(135deg, var(--warning-color) 0%, #b45309 100%);
+                color: white;
+            }
+
+            .table-card thead th {
+                font-weight: 600;
+                padding: 1rem;
+                border: none;
+            }
+
+            .table-card tbody tr {
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .table-card tbody tr:hover {
+                background-color: #f9fafb;
+            }
+
+            .table-card td {
+                padding: 1rem;
+                vertical-align: middle;
+            }
+
+            .btn-approve {
+                background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
+                border: none;
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+            }
+
+            .btn-approve:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+                color: white;
+            }
+
+            .btn-report {
+                background: var(--primary-color);
+                border: none;
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                font-size: 0.9rem;
+            }
+
+            .btn-report:hover {
+                background: var(--secondary-color);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .section-title {
+                color: var(--warning-color);
+                font-weight: 700;
+                margin: 2rem 0 1rem 0;
+                font-size: 1.3rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .logout-btn {
+                background-color: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-weight: 600;
+            }
+
+            .logout-btn:hover {
+                background-color: rgba(255, 255, 255, 0.3);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 2rem;
+                color: #6b7280;
+                background-color: white;
+                border-radius: 8px;
+                border: 2px dashed var(--border-color);
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Navbar -->
+        <nav class="navbar navbar-custom">
+            <div class="container-fluid">
+                <span class="navbar-brand" style="color: white; font-weight: 700"> <i class="fas fa-check-circle me-2"></i>Quản Lý Phê Duyệt </span>
+                <a href="/logout" class="logout-btn"> <i class="fas fa-sign-out-alt me-2"></i>Đăng Xuất </a>
+            </div>
+        </nav>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <!-- Header -->
+                    <div class="header-section">
+                        <h1><i class="fas fa-tachometer-alt me-2"></i>Bảng Điều Khiển PM</h1>
+                        <p class="mb-0">Phê duyệt và quản lý khảo sát</p>
+                    </div>
+
+                    <!-- Pending Surveys -->
+                    <h2 class="section-title"><i class="fas fa-hourglass-half"></i>Khảo Sát Chờ Phê Duyệt</h2>
+                    <div class="table-card">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tiêu Đề</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="survey : ${pendingSurveys}">
+                                    <td><strong th:text="${survey.id}"></strong></td>
+                                    <td th:text="${survey.title}"></td>
+                                    <td>
+                                        <form th:action="@{/pm/approve/{id}(id=${survey.id})}" method="post" class="d-inline">
+                                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                                            <button type="submit" class="btn-approve"><i class="fas fa-check me-1"></i>Phê Duyệt</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${pendingSurveys.isEmpty()}">
+                                    <td colspan="3" class="text-center text-muted py-3"><i class="fas fa-inbox me-2"></i>Không có khảo sát nào chờ phê duyệt</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Approved Surveys -->
+                    <h2 class="section-title"><i class="fas fa-check-double"></i>Khảo Sát Đã Phê Duyệt</h2>
+                    <div class="table-card">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Tiêu Đề</th>
+                                    <th>Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="survey : ${approvedSurveys}">
+                                    <td><strong th:text="${survey.id}"></strong></td>
+                                    <td th:text="${survey.title}"></td>
+                                    <td>
+                                        <a th:href="@{/pm/report/{id}(id=${survey.id})}" class="btn-report"> <i class="fas fa-chart-bar me-1"></i>Xem Báo Cáo </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${approvedSurveys.isEmpty()}">
+                                    <td colspan="3" class="text-center text-muted py-3"><i class="fas fa-inbox me-2"></i>Không có khảo sát nào được phê duyệt</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

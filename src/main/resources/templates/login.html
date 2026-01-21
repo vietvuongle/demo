@@ -1,15 +1,228 @@
 <!doctype html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
+        <title>Hệ Thống Khảo Sát - Đăng Nhập</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .login-container {
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                padding: 3rem 2.5rem;
+                width: 100%;
+                max-width: 450px;
+                animation: slideUp 0.5s ease-out;
+            }
+
+            @keyframes slideUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .login-header {
+                text-align: center;
+                margin-bottom: 2.5rem;
+            }
+
+            .login-header i {
+                font-size: 3.5rem;
+                color: #667eea;
+                margin-bottom: 1rem;
+                display: block;
+            }
+
+            .login-header h1 {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #2d3748;
+                margin-bottom: 0.5rem;
+            }
+
+            .login-header p {
+                color: #718096;
+                font-size: 0.95rem;
+                margin: 0;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .form-group label {
+                font-weight: 600;
+                color: #2d3748;
+                margin-bottom: 0.5rem;
+                font-size: 0.95rem;
+            }
+
+            .form-control {
+                border: 2px solid #e2e8f0;
+                border-radius: 10px;
+                padding: 0.75rem 1rem;
+                font-size: 0.95rem;
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                outline: none;
+            }
+
+            .form-control::placeholder {
+                color: #cbd5e0;
+            }
+
+            .login-btn {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                color: white;
+                padding: 0.9rem;
+                border-radius: 10px;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .login-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+                color: white;
+            }
+
+            .login-btn:active {
+                transform: translateY(0);
+            }
+
+            .error-message {
+                background-color: #fed7d7;
+                border: 1px solid #fc8181;
+                color: #c53030;
+                padding: 0.75rem 1rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .error-message i {
+                font-size: 1.2rem;
+            }
+
+            .remember-me {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-top: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .remember-me input {
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+            .remember-me label {
+                margin: 0;
+                cursor: pointer;
+                color: #4a5568;
+            }
+
+            .demo-info {
+                background-color: #f0f4ff;
+                border-left: 4px solid #667eea;
+                padding: 1rem;
+                border-radius: 8px;
+                margin-top: 1.5rem;
+                font-size: 0.85rem;
+            }
+
+            .demo-info strong {
+                color: #667eea;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .demo-info p {
+                margin: 0.25rem 0;
+                color: #4a5568;
+            }
+        </style>
     </head>
     <body>
-        <form th:action="@{/login}" method="post">
-            <input name="username" placeholder="Username" />
-            <input name="password" type="password" placeholder="Password" />
-            <button type="submit">Login</button>
-        </form>
+        <div class="login-container">
+            <!-- Header -->
+            <div class="login-header">
+                <i class="fas fa-tasks"></i>
+                <h1>Đăng Nhập</h1>
+                <p>Hệ Thống Quản Lý Khảo Sát</p>
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${param.error}" class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <strong>Đăng nhập thất bại!</strong>
+                    <p>Tên đăng nhập hoặc mật khẩu không đúng.</p>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form method="post" th:action="@{/login}">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user me-2"></i>Tên Đăng Nhập</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Nhập tên đăng nhập..." required autofocus />
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock me-2"></i>Mật Khẩu</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Nhập mật khẩu..." required />
+                </div>
+
+                <div class="remember-me">
+                    <input type="checkbox" id="remember" name="remember-me" />
+                    <label for="remember">Ghi nhớ tôi</label>
+                </div>
+
+                <button type="submit" class="login-btn"><i class="fas fa-sign-in-alt me-2"></i>Đăng Nhập</button>
+            </form>
+
+            <!-- Demo Info -->
+            <div class="demo-info">
+                <strong><i class="fas fa-info-circle me-1"></i>Tài Khoản Demo</strong>
+                <p><strong>Admin:</strong> admin / password123</p>
+                <p><strong>PM:</strong> pm / password123</p>
+                <p><strong>Member:</strong> member / password123</p>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

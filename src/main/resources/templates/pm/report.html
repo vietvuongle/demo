@@ -1,0 +1,40 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Survey Report</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="container mt-5">
+            <h2>Report for Survey: <span th:text="${survey.title}"></span></h2>
+            <a href="/pm/dashboard" class="btn btn-secondary mb-3">Back to Dashboard</a>
+            <h3>Submissions</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Submitted At</th>
+                        <th>Answers</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="submission : ${submissions}">
+                        <td th:text="${submission.user.fullName}"></td>
+                        <td th:text="${submission.submittedAt}"></td>
+                        <td>
+                            <!-- Display answers, perhaps in a nested list or table -->
+                            <ul>
+                                <li th:each="answer : ${submission.answers}">
+                                    <strong th:text="${answer.question.content} + ':'"></strong>
+                                    <span th:if="${answer.answerText}" th:text="${answer.answerText}"></span>
+                                    <span th:if="${answer.option}" th:text="${answer.option.content}"></span>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Add statistics here, e.g., charts or counts -->
+        </div>
+    </body>
+</html>

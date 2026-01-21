@@ -1,0 +1,446 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Quản lý Câu hỏi</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <style>
+            :root {
+                --primary-color: #2563eb;
+                --secondary-color: #1e40af;
+                --success-color: #059669;
+                --warning-color: #d97706;
+                --light-bg: #f8fafc;
+                --border-color: #e2e8f0;
+            }
+
+            body {
+                background-color: var(--light-bg);
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .header-section {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 12px;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+            }
+
+            .header-section h2 {
+                font-weight: 700;
+                margin: 0;
+                font-size: 2rem;
+            }
+
+            .header-section p {
+                margin: 0.5rem 0 0 0;
+                font-size: 0.95rem;
+                opacity: 0.9;
+            }
+
+            .btn-back {
+                background-color: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 0.6rem 1.5rem;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                text-decoration: none;
+                font-weight: 600;
+            }
+
+            .btn-back:hover {
+                background-color: rgba(255, 255, 255, 0.3);
+                border-color: rgba(255, 255, 255, 0.5);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .alert-empty {
+                background-color: #fef3c7;
+                border: 2px solid #fcd34d;
+                border-radius: 8px;
+                padding: 1.5rem;
+                text-align: center;
+                color: #92400e;
+            }
+
+            .alert-empty a {
+                color: #b45309;
+                font-weight: 600;
+                text-decoration: none;
+                border-bottom: 2px solid currentColor;
+            }
+
+            .alert-empty a:hover {
+                color: #7c2d12;
+            }
+
+            .group-card {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                border: 1px solid var(--border-color);
+                overflow: hidden;
+                transition: all 0.3s ease;
+                margin-bottom: 1.5rem;
+            }
+
+            .group-card:hover {
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+                border-color: var(--primary-color);
+            }
+
+            .group-header {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                color: white;
+                padding: 1.25rem;
+                border-bottom: 0;
+            }
+
+            .group-header h5 {
+                margin: 0;
+                font-weight: 700;
+                font-size: 1.25rem;
+            }
+
+            .group-description {
+                font-size: 0.9rem;
+                color: #6b7280;
+                margin: 0.75rem 0;
+                font-style: italic;
+            }
+
+            .badge-group {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.75rem;
+            }
+
+            .badge-custom {
+                background-color: rgba(255, 255, 255, 0.2);
+                color: white;
+                padding: 0.4rem 0.8rem;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .question-list-header {
+                padding: 1.5rem 1.5rem 0.75rem;
+                border-bottom: 2px solid var(--border-color);
+                margin-bottom: 1rem;
+            }
+
+            .question-list-header h6 {
+                margin: 0;
+                color: var(--primary-color);
+                font-weight: 700;
+                font-size: 1.1rem;
+            }
+
+            .question-item {
+                background-color: #f9fafb;
+                border-left: 4px solid var(--primary-color);
+                padding: 1rem;
+                margin: 1rem 1.5rem;
+                border-radius: 6px;
+                transition: all 0.3s ease;
+            }
+
+            .question-item:hover {
+                background-color: #f3f4f6;
+                border-left-color: var(--success-color);
+            }
+
+            .question-content {
+                font-weight: 600;
+                color: #1f2937;
+                margin-bottom: 0.5rem;
+                font-size: 1.05rem;
+            }
+
+            .question-meta {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .question-type {
+                background-color: #dbeafe;
+                color: #1e40af;
+                padding: 0.25rem 0.75rem;
+                border-radius: 4px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .question-required {
+                background-color: #fee2e2;
+                color: #991b1b;
+                padding: 0.25rem 0.75rem;
+                border-radius: 4px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+
+            .options-section {
+                background-color: white;
+                border: 1px solid var(--border-color);
+                border-radius: 6px;
+                padding: 0.75rem;
+                margin-top: 0.75rem;
+            }
+
+            .options-list {
+                list-style: none;
+                padding: 0;
+                margin: 0.5rem 0;
+            }
+
+            .options-list li {
+                background-color: #f0fdf4;
+                color: #166534;
+                padding: 0.5rem 0.75rem;
+                border-radius: 4px;
+                margin-bottom: 0.4rem;
+                border-left: 3px solid var(--success-color);
+                font-size: 0.95rem;
+            }
+
+            .add-option-form {
+                display: flex;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .add-option-form input {
+                flex: 1;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+                background-color: #f9fafb;
+                border-radius: 8px;
+                margin-top: 1rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .form-section h6 {
+                color: var(--primary-color);
+                font-weight: 700;
+                margin-bottom: 1rem;
+                font-size: 1.1rem;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: #374151;
+                font-size: 0.95rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .form-control,
+            .form-select {
+                border: 1.5px solid var(--border-color);
+                border-radius: 6px;
+                padding: 0.75rem;
+                font-size: 0.95rem;
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus,
+            .form-select:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+                outline: none;
+            }
+
+            .form-check {
+                padding: 0.75rem;
+                background-color: white;
+                border-radius: 6px;
+                border: 1px solid var(--border-color);
+            }
+
+            .form-check-input {
+                width: 1.25rem;
+                height: 1.25rem;
+                cursor: pointer;
+                border: 2px solid var(--border-color);
+            }
+
+            .form-check-input:checked {
+                background-color: var(--success-color);
+                border-color: var(--success-color);
+            }
+
+            .btn-submit {
+                background-color: var(--success-color);
+                border: none;
+                padding: 0.75rem 1.5rem;
+                border-radius: 6px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                color: white;
+            }
+
+            .btn-submit:hover {
+                background-color: #047857;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            }
+
+            .btn-submit:active {
+                transform: translateY(0);
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 2rem;
+                color: #6b7280;
+                background-color: white;
+                border-radius: 8px;
+                border: 2px dashed var(--border-color);
+            }
+
+            .empty-state i {
+                font-size: 2.5rem;
+                color: var(--border-color);
+                margin-bottom: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid py-4">
+            <!-- Header Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="header-section d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 th:text="${survey.title}"></h2>
+                            <p><i class="fas fa-edit me-2"></i>Quản lý Câu hỏi Khảo Sát</p>
+                        </div>
+                        <a th:href="@{/admin/survey-detail/{id}(id=${survey.id})}" class="btn-back"> <i class="fas fa-arrow-left me-2"></i>Quay Lại </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <!-- Empty State -->
+                    <div th:if="${surveyGroups == null or surveyGroups.isEmpty()}" class="alert-empty">
+                        <i class="fas fa-inbox me-2"></i>
+                        <strong>Chưa có nhóm câu hỏi</strong>
+                        <p class="mt-2 mb-0">Vui lòng <a th:href="@{/admin/survey-detail/{id}(id=${survey.id})}">thêm nhóm câu hỏi</a> trước khi tạo câu hỏi.</p>
+                    </div>
+
+                    <!-- Question Groups -->
+                    <div th:unless="${surveyGroups == null or surveyGroups.isEmpty()}">
+                        <div th:each="sg : ${surveyGroups}" class="group-card">
+                            <!-- Group Header -->
+                            <div class="group-header">
+                                <h5 th:text="${sg.group.name}"></h5>
+                                <p class="group-description" th:if="${sg.group.description}" th:text="${sg.group.description}"></p>
+                                <div class="badge-group">
+                                    <span class="badge-custom">
+                                        <i class="fas fa-users me-1"></i>
+                                        <span th:text="${sg.group.targetRole ?: 'Tất cả vai trò'}"></span>
+                                    </span>
+                                    <span class="badge-custom">
+                                        <i class="fas fa-list me-1"></i>
+                                        <span th:text="${sg.group.questions != null ? sg.group.questions.size() : 0} + ' câu hỏi'"></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Group Body -->
+                            <div class="group-body">
+                                <!-- Questions List -->
+                                <div th:if="${sg.group.questions != null and !sg.group.questions.isEmpty()}">
+                                    <div class="question-list-header">
+                                        <h6><i class="fas fa-question-circle me-2"></i>Danh Sách Câu Hỏi</h6>
+                                    </div>
+                                    <div th:each="question : ${sg.group.questions}" class="question-item">
+                                        <p class="question-content" th:text="${question.content}"></p>
+                                        <div class="question-meta">
+                                            <span class="question-type">
+                                                <i class="fas fa-tag me-1"></i>
+                                                <span th:text="${#strings.replace(question.type, 'YES_NO', 'Có/Không')}"></span>
+                                            </span>
+                                            <span th:if="${question.required}" class="question-required"> <i class="fas fa-star me-1"></i>Bắt buộc </span>
+                                        </div>
+
+                                        <!-- Options for Multiple Choice -->
+                                        <div th:if="${question.type == 'OPTION'}" class="options-section">
+                                            <strong><i class="fas fa-check me-1" style="color: var(--success-color)"></i>Các Lựa Chọn:</strong>
+                                            <ul class="options-list" th:if="${question.options != null}">
+                                                <li th:each="opt : ${question.options}" th:text="${opt.content}"></li>
+                                            </ul>
+                                            <form method="post" th:action="@{/admin/question/{id}/option(id=${question.id})}" class="add-option-form">
+                                                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                                                <input type="text" name="content" class="form-control form-control-sm" placeholder="Thêm lựa chọn mới..." />
+                                                <button type="submit" class="btn btn-sm" style="background-color: var(--primary-color); color: white; border-radius: 6px"><i class="fas fa-plus"></i> Thêm</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Empty Questions State -->
+                                <div th:if="${sg.group.questions == null or sg.group.questions.isEmpty()}" class="empty-state">
+                                    <i class="fas fa-question-circle"></i>
+                                    <p class="mb-0">Chưa có câu hỏi nào. Hãy thêm câu hỏi đầu tiên dưới đây!</p>
+                                </div>
+
+                                <!-- Add Question Form -->
+                                <div class="form-section">
+                                    <h6><i class="fas fa-plus-circle me-2"></i>Thêm Câu Hỏi Mới</h6>
+                                    <form method="post" th:action="@{/admin/survey/{surveyId}/question(surveyId=${survey.id})}">
+                                        <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                                        <input type="hidden" name="group.id" th:value="${sg.group.id}" />
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Nội Dung Câu Hỏi <span class="text-danger">*</span></label>
+                                            <textarea name="content" class="form-control" rows="3" placeholder="Nhập nội dung câu hỏi của bạn..." required></textarea>
+                                            <small class="text-muted">Hãy viết câu hỏi rõ ràng và dễ hiểu</small>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Loại Câu Hỏi <span class="text-danger">*</span></label>
+                                            <select name="type" class="form-select" required onchange="handleTypeChange(this)">
+                                                <option value="">-- Chọn Loại Câu Hỏi --</option>
+                                                <option value="YES_NO">Có / Không</option>
+                                                <option value="TEXT">Trả Lời Tự Do</option>
+                                                <option value="OPTION">Chọn Một Trong Các Phương Án</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-check">
+                                            <input type="checkbox" name="required" class="form-check-input" th:id="'required_' + ${sg.group.id}" />
+                                            <label class="form-check-label" th:for="'required_' + ${sg.group.id}"> <i class="fas fa-exclamation-circle me-2"></i>Đây là câu hỏi bắt buộc </label>
+                                        </div>
+
+                                        <button type="submit" class="btn-submit mt-3 w-100"><i class="fas fa-plus me-2"></i>Thêm Câu Hỏi</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function handleTypeChange(select) {
+                console.log("Question type changed to:", select.value);
+            }
+        </script>
+    </body>
+</html>

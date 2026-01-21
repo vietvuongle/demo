@@ -1,0 +1,264 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chi Tiết Khảo Sát</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <style>
+            :root {
+                --primary-color: #2563eb;
+                --secondary-color: #1e40af;
+                --success-color: #059669;
+                --light-bg: #f8fafc;
+                --border-color: #e2e8f0;
+            }
+
+            body {
+                background-color: var(--light-bg);
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .header-section {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 12px;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+            }
+
+            .header-section h2 {
+                margin: 0;
+                font-weight: 700;
+                font-size: 2rem;
+            }
+
+            .btn-back {
+                background-color: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                transition: all 0.3s ease;
+            }
+
+            .btn-back:hover {
+                background-color: rgba(255, 255, 255, 0.3);
+                color: white;
+            }
+
+            .groups-table {
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            }
+
+            .groups-table thead {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                color: white;
+            }
+
+            .groups-table thead th {
+                font-weight: 600;
+                padding: 1rem;
+                border: none;
+            }
+
+            .form-card {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                border: 1px solid var(--border-color);
+            }
+
+            .form-card h5 {
+                color: var(--primary-color);
+                font-weight: 700;
+                margin-bottom: 1rem;
+            }
+
+            .form-control,
+            .form-select {
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                padding: 0.75rem;
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus,
+            .form-select:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            }
+
+            .btn-submit {
+                background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
+                border: none;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .btn-submit:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+                color: white;
+            }
+
+            .btn-manage {
+                background: var(--primary-color);
+                border: none;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .btn-manage:hover {
+                background: var(--secondary-color);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .section-title {
+                color: var(--primary-color);
+                font-weight: 700;
+                margin-top: 2rem;
+                margin-bottom: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                font-size: 1.3rem;
+            }
+
+            .alert-empty {
+                background-color: #fef3c7;
+                border: 2px solid #fcd34d;
+                border-radius: 8px;
+                color: #92400e;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <!-- Header -->
+                    <div class="header-section d-flex justify-content-between align-items-center">
+                        <h2 th:text="${survey.title}"></h2>
+                        <div>
+                            <a href="/admin/dashboard" class="btn btn-back me-2"> <i class="fas fa-arrow-left me-2"></i>Quay Lại </a>
+                            <a th:href="@{/admin/survey/{id}/questions(id=${survey.id})}" class="btn btn-manage"> <i class="fas fa-list me-2"></i>Quản Lý Câu Hỏi </a>
+                        </div>
+                    </div>
+
+                    <!-- Question Groups -->
+                    <div>
+                        <h3 class="section-title"><i class="fas fa-layer-group"></i>Nhóm Câu Hỏi</h3>
+                        <div th:if="${surveyGroups.isEmpty()}" class="alert alert-empty"><i class="fas fa-info-circle me-2"></i>Chưa có nhóm câu hỏi nào được thêm</div>
+                        <div class="groups-table" th:unless="${surveyGroups.isEmpty()}">
+                            <table class="table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tên Nhóm</th>
+                                        <th>Mã Nhóm</th>
+                                        <th>Vai Trò Mục Tiêu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="sg : ${surveyGroups}">
+                                        <td th:text="${sg.group.name}"></td>
+                                        <td><code th:text="${sg.group.code}"></code></td>
+                                        <td>
+                                            <span class="badge bg-info" th:text="${sg.group.targetRole ?: 'Tất cả'}"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Add Question Group -->
+                    <h3 class="section-title mt-4"><i class="fas fa-plus-circle"></i>Thêm Nhóm Câu Hỏi</h3>
+
+                    <!-- Option 1: Select Existing Group -->
+                    <div class="form-card">
+                        <h5><i class="fas fa-hand-pointer me-2"></i>Lựa Chọn 1: Chọn Nhóm Hiện Có</h5>
+                        <form id="addGroupForm" method="post" th:data-survey-id="${survey.id}">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <select class="form-select" id="groupSelect" required>
+                                        <option value="">-- Chọn Nhóm Câu Hỏi --</option>
+                                        <option th:each="group : ${allGroups}" th:value="${group.id}" th:text="${group.name}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn-submit w-100"><i class="fas fa-plus me-2"></i>Thêm Nhóm</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Option 2: Create New Group -->
+                    <div class="form-card">
+                        <h5><i class="fas fa-pen me-2"></i>Lựa Chọn 2: Tạo Nhóm Mới</h5>
+                        <form method="post" th:action="@{/admin/survey/{surveyId}/create-group(surveyId=${survey.id})}">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Mã Nhóm</label>
+                                        <input type="text" class="form-control" name="code" placeholder="ví dụ: quest_base" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Tên Nhóm</label>
+                                        <input type="text" class="form-control" name="name" placeholder="ví dụ: Bộ câu hỏi chung" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mô Tả</label>
+                                <textarea class="form-control" name="description" rows="2" placeholder="Nhập mô tả nhóm..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Vai Trò Mục Tiêu</label>
+                                <select class="form-select" name="targetRole">
+                                    <option value="">ALL</option>
+                                    <option value="MEMBER">MEMBER</option>
+                                    <option value="LEADER">LEADER</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-submit"><i class="fas fa-save me-2"></i>Tạo và Thêm Nhóm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.getElementById("addGroupForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+                const groupId = document.getElementById("groupSelect").value;
+                if (!groupId) {
+                    alert("Vui lòng chọn một nhóm câu hỏi");
+                    return;
+                }
+                const surveyId = this.getAttribute("data-survey-id");
+                this.action = "/admin/survey/" + surveyId + "/add-group/" + groupId;
+                this.submit();
+            });
+        </script>
+    </body>
+</html>
