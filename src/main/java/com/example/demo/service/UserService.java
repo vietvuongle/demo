@@ -27,6 +27,10 @@ public class UserService {
         return userRepository.findByUsername(username).orElse(null);
     }
 
+    public java.util.List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     // CRUD for users (ADMIN only)
     public User createUser(User user, Set<RoleCode> roleCodes) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));

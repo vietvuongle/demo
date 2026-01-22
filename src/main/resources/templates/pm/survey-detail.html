@@ -1,0 +1,316 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chi Tiết Khảo Sát</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <style>
+            :root {
+                --primary-color: #2563eb;
+                --secondary-color: #1e40af;
+                --success-color: #059669;
+                --warning-color: #d97706;
+                --danger-color: #dc2626;
+                --light-bg: #f8fafc;
+                --border-color: #e2e8f0;
+            }
+
+            body {
+                background-color: var(--light-bg);
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .navbar-custom {
+                background: linear-gradient(135deg, var(--warning-color) 0%, #b45309 100%);
+                box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
+            }
+
+            .navbar-brand {
+                font-weight: 700;
+                font-size: 1.5rem;
+                color: white !important;
+            }
+
+            .header-section {
+                background: linear-gradient(135deg, var(--warning-color) 0%, #b45309 100%);
+                color: white;
+                padding: 2rem;
+                border-radius: 12px;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 15px rgba(217, 119, 6, 0.2);
+            }
+
+            .header-section h1 {
+                margin: 0;
+                font-weight: 700;
+                font-size: 2rem;
+            }
+
+            .card-custom {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                border: 1px solid var(--border-color);
+                margin-bottom: 2rem;
+            }
+
+            .card-header-custom {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                color: white;
+                padding: 1.5rem;
+                border-radius: 12px 12px 0 0;
+                font-weight: 700;
+            }
+
+            .card-body-custom {
+                padding: 1.5rem;
+            }
+
+            .info-row {
+                display: flex;
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .info-label {
+                font-weight: 700;
+                color: var(--primary-color);
+                width: 200px;
+            }
+
+            .info-value {
+                color: #374151;
+                flex: 1;
+            }
+
+            .status-badge {
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                font-weight: 600;
+                display: inline-block;
+            }
+
+            .status-pending {
+                background-color: #fef3c7;
+                color: #92400e;
+            }
+
+            .status-draft {
+                background-color: #e5e7eb;
+                color: #374151;
+            }
+
+            .group-item {
+                background-color: #f9fafb;
+                border-left: 4px solid var(--primary-color);
+                padding: 1rem;
+                margin-bottom: 1rem;
+                border-radius: 6px;
+            }
+
+            .question-item {
+                background-color: white;
+                border: 1px solid var(--border-color);
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+                border-radius: 6px;
+            }
+
+            .question-type {
+                background-color: #dbeafe;
+                color: #1e40af;
+                padding: 0.25rem 0.75rem;
+                border-radius: 4px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                display: inline-block;
+            }
+
+            .btn-custom {
+                padding: 0.75rem 1.5rem;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                border: none;
+            }
+
+            .btn-approve {
+                background: linear-gradient(135deg, var(--success-color) 0%, #047857 100%);
+                color: white;
+            }
+
+            .btn-approve:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+                color: white;
+            }
+
+            .btn-reject {
+                background: linear-gradient(135deg, var(--danger-color) 0%, #991b1b 100%);
+                color: white;
+            }
+
+            .btn-reject:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+                color: white;
+            }
+
+            .btn-back {
+                background-color: #6b7280;
+                color: white;
+            }
+
+            .btn-back:hover {
+                background-color: #4b5563;
+                color: white;
+            }
+
+            .logout-btn {
+                background-color: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-weight: 600;
+            }
+
+            .logout-btn:hover {
+                background-color: rgba(255, 255, 255, 0.3);
+                color: white;
+                transform: translateY(-2px);
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Navbar -->
+        <nav class="navbar navbar-custom">
+            <div class="container-fluid">
+                <span class="navbar-brand"> <i class="fas fa-check-circle me-2"></i>Quản Lý Phê Duyệt </span>
+                <a href="/logout" class="logout-btn"> <i class="fas fa-sign-out-alt me-2"></i>Đăng Xuất </a>
+            </div>
+        </nav>
+
+        <div class="container-fluid py-4">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <!-- Header -->
+                    <div class="header-section">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h1 th:text="${survey.title}"></h1>
+                                <p class="mb-0"><i class="fas fa-info-circle me-2"></i>Chi tiết khảo sát</p>
+                            </div>
+                            <a href="/pm/dashboard" class="btn btn-light"><i class="fas fa-arrow-left me-2"></i>Quay Lại</a>
+                        </div>
+                    </div>
+
+                    <!-- Survey Information -->
+                    <div class="card-custom">
+                        <div class="card-header-custom"><i class="fas fa-file-alt me-2"></i>Thông Tin Khảo Sát</div>
+                        <div class="card-body-custom">
+                            <div class="info-row">
+                                <div class="info-label">Tiêu Đề:</div>
+                                <div class="info-value" th:text="${survey.title}"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Mô Tả:</div>
+                                <div class="info-value" th:text="${survey.description ?: 'Không có mô tả'}"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Trạng Thái:</div>
+                                <div class="info-value">
+                                    <span class="status-badge" th:classappend="${survey.status == 'PENDING' ? 'status-pending' : 'status-draft'}" th:text="${survey.status}"></span>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Ngày Bắt Đầu:</div>
+                                <div class="info-value" th:text="${#temporals.format(survey.startDate, 'dd/MM/yyyy HH:mm')}"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Ngày Kết Thúc:</div>
+                                <div class="info-value" th:text="${#temporals.format(survey.endDate, 'dd/MM/yyyy HH:mm')}"></div>
+                            </div>
+                            <div class="info-row" style="border-bottom: none">
+                                <div class="info-label">Người Tạo:</div>
+                                <div class="info-value" th:text="${survey.createdBy.fullName ?: survey.createdBy.username}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Survey Questions -->
+                    <div class="card-custom">
+                        <div class="card-header-custom"><i class="fas fa-question-circle me-2"></i>Câu Hỏi Khảo Sát</div>
+                        <div class="card-body-custom">
+                            <div th:if="${surveyGroups == null or surveyGroups.isEmpty()}" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox me-2" style="font-size: 2rem"></i>
+                                <p>Chưa có câu hỏi nào</p>
+                            </div>
+
+                            <div th:unless="${surveyGroups == null or surveyGroups.isEmpty()}">
+                                <div th:each="sg : ${surveyGroups}" class="group-item">
+                                    <h5 th:text="${sg.group.name}" style="color: var(--primary-color); margin-bottom: 1rem"></h5>
+                                    <p th:if="${sg.group.description}" class="text-muted small" th:text="${sg.group.description}"></p>
+
+                                    <div th:if="${sg.group.questions == null or sg.group.questions.isEmpty()}" class="text-muted">
+                                        <small>Nhóm này chưa có câu hỏi</small>
+                                    </div>
+
+                                    <div th:unless="${sg.group.questions == null or sg.group.questions.isEmpty()}">
+                                        <div th:each="question : ${sg.group.questions}" class="question-item">
+                                            <p style="margin-bottom: 0.5rem; font-weight: 600" th:text="${question.content}"></p>
+                                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem">
+                                                <span class="question-type">
+                                                    <i class="fas fa-tag me-1"></i>
+                                                    <span th:text="${question.type}"></span>
+                                                </span>
+                                                <span th:if="${question.required}" class="badge bg-danger"> <i class="fas fa-star me-1"></i>Bắt buộc </span>
+                                            </div>
+
+                                            <!-- Options for OPTION type -->
+                                            <div th:if="${question.type == 'OPTION'}" style="margin-top: 0.75rem; padding-left: 1rem; border-left: 2px solid var(--success-color)">
+                                                <small class="text-muted">Lựa chọn:</small>
+                                                <ul class="mb-0 mt-0.5" style="list-style: none; padding-left: 0">
+                                                    <li th:each="option : ${question.options}" style="padding: 0.25rem 0; color: #059669">
+                                                        <i class="fas fa-check-circle me-1" style="font-size: 0.8rem"></i>
+                                                        <span th:text="${option.content}"></span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div th:if="${survey.status == 'PENDING'}" class="d-flex gap-2 justify-content-center mb-4">
+                        <form th:action="@{/pm/approve/{id}(id=${survey.id})}" method="post" class="d-inline">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                            <button type="submit" class="btn btn-custom btn-approve"><i class="fas fa-check me-2"></i>Phê Duyệt Khảo Sát</button>
+                        </form>
+
+                        <form th:action="@{/pm/reject/{id}(id=${survey.id})}" method="post" class="d-inline">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                            <button type="submit" class="btn btn-custom btn-reject" onclick="return confirm('Bạn chắc chắn muốn từ chối phê duyệt khảo sát này?');"><i class="fas fa-times me-2"></i>Từ Chối</button>
+                        </form>
+                    </div>
+
+                    <div th:unless="${survey.status == 'PENDING'}" class="alert alert-info text-center mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Khảo sát này không ở trạng thái chờ phê duyệt. Trạng thái hiện tại:
+                        <strong th:text="${survey.status}"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>

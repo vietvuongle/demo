@@ -88,6 +88,10 @@ public class SurveyService {
         sg.setSurvey(survey);
         sg.setGroup(group);
         surveyGroupRepository.save(sg);
+        
+        // Update survey status to PENDING
+        survey.setStatus(SurveyStatus.PENDING);
+        surveyRepository.save(survey);
     }
 
     @Transactional
@@ -121,12 +125,30 @@ public class SurveyService {
 
     @Transactional
     public void approveSurvey(Long surveyId, User pm) {
-        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_approve_survey");
-        query.registerStoredProcedureParameter("p_survey_id", Long.class, ParameterMode.IN);
-        query.registerStoredProcedureParameter("p_pm_id", Long.class, ParameterMode.IN);
-        query.setParameter("p_survey_id", surveyId);
-        query.setParameter("p_pm_id", pm.getId());
-        query.execute();
+        try {
+            StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_approve_survey");
+            query.registerStoredProcedureParameter("p_survey_id", Long.class, ParameterMode.IN);
+            query.registerStoredProcedureParameter("p_pm_id", Long.class, ParameterMode.IN);
+            query.setParameter("p_survey_id", surveyId);
+            query.setParameter("p_pm_id", pm.getId());
+            query.execute();
+        } catch (Exception e) {
+            System.err.println("Stored procedure error: " + e.getMessage());
+            e.printStackTrace();
+            // Fallback: update status directly without stored procedure
+            Survey survey = surveyRepository.findById(surveyId).orElseThrow();
+            survey.setStatus(SurveyStatus.APPROVED);
+            survey.setApprovedBy(pm);
+            survey.setApprovedAt(LocalDateTime.now());
+            surveyRepository.save(survey);
+        }
+    }
+
+    @Transactional
+    public void rejectSurvey(Long surveyId) {
+        Survey survey = surveyRepository.findById(surveyId).orElseThrow();
+        survey.setStatus(SurveyStatus.DRAFT);
+        surveyRepository.save(survey);
     }
 
     public List<Survey> getAvailableSurveysForUser(User user) {
@@ -177,6 +199,10 @@ public class SurveyService {
 
     public List<SurveyGroup> getSurveyGroups(Long surveyId) {
         return surveyGroupRepository.findBySurveyId(surveyId);
+    }
+
+    public List<SurveyAssignRule> getAssignRules(Long surveyId) {
+        return assignRuleRepository.findBySurveyId(surveyId);
     }
 
     public Question getQuestionById(Long questionId) {

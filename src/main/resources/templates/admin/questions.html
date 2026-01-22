@@ -318,20 +318,22 @@
     </head>
     <body>
         <div class="container-fluid py-4">
-            <!-- Header Section -->
-            <div class="row mb-4">
-                <div class="col-12">
+            <div class="row">
+                <div class="col-lg-10 mx-auto">
+                    <!-- Header Section -->
+
                     <div class="header-section d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 th:text="${survey.title}"></h2>
-                            <p><i class="fas fa-edit me-2"></i>Quản lý Câu hỏi Khảo Sát</p>
+                        <a th:href="@{/admin/survey-detail/{id}(id=${survey.id})}" class="btn btn-back me-2"> <i class="fas fa-arrow-left me-2"></i>Quay Lại </a>
+
+                        <div class="d-flex">
+                            <h2 th:text="${survey.title}" class="btn btn-back me-2"></h2>
                         </div>
-                        <a th:href="@{/admin/survey-detail/{id}(id=${survey.id})}" class="btn-back"> <i class="fas fa-arrow-left me-2"></i>Quay Lại </a>
+                        <div></div>
                     </div>
+
+                    <!-- Main Content -->
                 </div>
             </div>
-
-            <!-- Main Content -->
             <div class="row">
                 <div class="col-lg-10 mx-auto">
                     <!-- Empty State -->
@@ -347,7 +349,6 @@
                             <!-- Group Header -->
                             <div class="group-header">
                                 <h5 th:text="${sg.group.name}"></h5>
-                                <p class="group-description" th:if="${sg.group.description}" th:text="${sg.group.description}"></p>
                                 <div class="badge-group">
                                     <span class="badge-custom">
                                         <i class="fas fa-users me-1"></i>
@@ -413,13 +414,22 @@
 
                                         <div class="mb-3">
                                             <label class="form-label">Loại Câu Hỏi <span class="text-danger">*</span></label>
-                                            <select name="type" class="form-select" required onchange="handleTypeChange(this)">
+                                            <select th:id="'type_' + ${sg.group.id}" name="type" class="form-select" required th:onchange="'handleTypeChange(this, ' + ${sg.group.id} + ')'">
                                                 <option value="">-- Chọn Loại Câu Hỏi --</option>
                                                 <option value="YES_NO">Có / Không</option>
                                                 <option value="TEXT">Trả Lời Tự Do</option>
                                                 <option value="OPTION">Chọn Một Trong Các Phương Án</option>
                                             </select>
                                         </div>
+
+                                        <!-- Options input for OPTION type -->
+                                        <div th:id="'options_' + ${sg.group.id}" style="display: none; margin-top: 1rem; padding: 1rem; background-color: #f0fdf4; border-radius: 6px; border: 1px solid var(--success-color)">
+                                            <label class="form-label"><i class="fas fa-list me-1" style="color: var(--success-color)"></i>Các Lựa Chọn (Nhập các lựa chọn, mỗi dòng một lựa chọn)</label>
+                                            <textarea th:id="'optionsText_' + ${sg.group.id}" class="form-control" rows="3" placeholder="Lựa chọn 1&#10;Lựa chọn 2&#10;Lựa chọn 3"></textarea>
+                                            <small class="text-muted d-block mt-1">Mỗi lựa chọn trên một dòng riêng</small>
+                                        </div>
+
+                                        <input type="hidden" th:id="'optionsHidden_' + ${sg.group.id}" name="optionsText" value="" />
 
                                         <div class="form-check">
                                             <input type="checkbox" name="required" class="form-check-input" th:id="'required_' + ${sg.group.id}" />
@@ -438,9 +448,35 @@
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            function handleTypeChange(select) {
-                console.log("Question type changed to:", select.value);
+            function handleTypeChange(select, groupId) {
+                const optionsContainer = document.getElementById("options_" + groupId);
+                if (select.value === "OPTION" && optionsContainer) {
+                    optionsContainer.style.display = "block";
+                } else if (optionsContainer) {
+                    optionsContainer.style.display = "none";
+                }
             }
+
+            // Handle form submission to convert options text to hidden field
+            document.querySelectorAll("form").forEach((form) => {
+                form.addEventListener("submit", function (e) {
+                    // Find all option text areas in this form
+                    const optionsTextAreas = this.querySelectorAll('textarea[id^="optionsText_"]');
+                    optionsTextAreas.forEach((textArea) => {
+                        const idMatch = textArea.id.match(/optionsText_(\d+)/);
+                        if (idMatch) {
+                            const groupId = idMatch[1];
+                            const hiddenField = document.getElementById("optionsHidden_" + groupId);
+                            const typeSelect = this.querySelector('select[name="type"]');
+
+                            // Only include options if type is OPTION
+                            if (typeSelect && typeSelect.value === "OPTION") {
+                                hiddenField.value = textArea.value;
+                            }
+                        }
+                    });
+                });
+            });
         </script>
     </body>
 </html>

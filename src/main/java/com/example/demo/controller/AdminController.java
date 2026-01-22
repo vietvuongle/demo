@@ -4,15 +4,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import java.util.EnumSet;
+import java.util.Set;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.entity.*;
+import com.example.demo.service.SurveyGroupService;
 import com.example.demo.service.SurveyService;
 import com.example.demo.service.UserService;
+import com.example.demo.enums.RoleCode;
+import com.example.demo.enums.RuleType;
 import com.example.demo.repository.QuestionGroupRepository;
 
 @Controller
@@ -27,11 +34,30 @@ public class AdminController {
     @Autowired
     private QuestionGroupRepository questionGroupRepository;
 
+    @Autowired
+    private SurveyGroupService surveyGroupService;
+
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication auth) {
-        model.addAttribute("survey", new Survey());
+        // Statistics
+        long totalSurveys = surveyService.getAllSurveys().size();
+        long pendingSurveys = surveyService.getPendingSurveys().size();
+        long approvedSurveys = surveyService.getApprovedSurveys().size();
+        long totalUsers = userService.getAllUsers().size();
+        
+        model.addAttribute("totalSurveys", totalSurveys);
+        model.addAttribute("pendingSurveys", pendingSurveys);
+        model.addAttribute("approvedSurveys", approvedSurveys);
+        model.addAttribute("totalUsers", totalUsers);
         model.addAttribute("surveys", surveyService.getAllSurveys());
+        
         return "admin/dashboard";
+    }
+
+    @GetMapping("/survey-detail/create")
+    public String createSurveyForm(Model model) {
+        model.addAttribute("survey", new Survey());
+        return "admin/create-survey";
     }
 
     @PostMapping("/create-survey")
@@ -47,20 +73,51 @@ public class AdminController {
         model.addAttribute("survey", survey);
         model.addAttribute("surveyGroups", surveyService.getSurveyGroups(id));
         model.addAttribute("allGroups", questionGroupRepository.findAll());
-        return "admin/surveys/detail";
+        model.addAttribute("assignRules", surveyService.getAssignRules(id));
+        return "admin/detail";
     }
 
+    @PostMapping("/survey/{surveyId}/assign-rule")
+    public String addAssignRule(@PathVariable Long surveyId, 
+                                @RequestParam String ruleType,
+                                @RequestParam(required = false) String ruleValue,
+                                RedirectAttributes redirectAttributes) {
+        SurveyAssignRule rule = new SurveyAssignRule();
+        Survey survey = surveyService.getSurveyById(surveyId);
+        rule.setSurvey(survey);
+        rule.setRuleType(RuleType.valueOf(ruleType));
+        rule.setRuleValue(ruleValue);
+        surveyService.addAssignRule(surveyId, rule);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm quy tắc phân công thành công!");
+        return "redirect:/admin/survey-detail/" + surveyId;
+    }
+
+    @PostMapping("/survey/{surveyId}/group/{groupId}/delete")
+    public String removeGroupFromSurvey(@PathVariable Long surveyId,
+                                        @PathVariable Long groupId,
+                                        RedirectAttributes redirectAttributes) {
+        surveyGroupService.deleteBySurveyIdAndGroupId(surveyId, groupId);
+        redirectAttributes.addFlashAttribute("successMessage", "Xóa nhóm khỏi survey thành công!");
+
+        return "redirect:/admin/survey-detail/" + surveyId;
+    }
+
+
     @PostMapping("/survey/{surveyId}/add-group/{groupId}")
-    public String addGroupToSurvey(@PathVariable Long surveyId, @PathVariable Long groupId) {
+    public String addGroupToSurvey(@PathVariable Long surveyId, @PathVariable Long groupId,
+                                   RedirectAttributes redirectAttributes) {
         surveyService.addGroupToSurvey(surveyId, groupId);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm nhóm câu hỏi thành công!");
         return "redirect:/admin/survey-detail/" + surveyId;
     }
 
     @PostMapping("/survey/{surveyId}/create-group")
-    public String createAndAddGroup(@PathVariable Long surveyId, @ModelAttribute QuestionGroup group) {
+    public String createAndAddGroup(@PathVariable Long surveyId, @ModelAttribute QuestionGroup group,
+                                    RedirectAttributes redirectAttributes) {
         QuestionGroup created = surveyService.createOrUpdateQuestionGroup(group);
         surveyService.addGroupToSurvey(surveyId, created.getId());
-        return "redirect:/admin/survey/" + surveyId + "/questions";
+        redirectAttributes.addFlashAttribute("successMessage", "Tạo và thêm nhóm câu hỏi thành công!");
+        return "redirect:/admin/survey-detail/" + surveyId;
     }
 
     @GetMapping("/survey/{surveyId}/questions")
@@ -69,13 +126,28 @@ public class AdminController {
         model.addAttribute("survey", survey);
         model.addAttribute("surveyGroups", surveyService.getSurveyGroups(surveyId));
         model.addAttribute("newQuestion", new Question());
-        return "admin/surveys/questions";
+        return "admin/questions";
     }
 
     @PostMapping("/survey/{surveyId}/question")
-    public String addQuestion(@PathVariable Long surveyId, @ModelAttribute Question question) {
+    public String addQuestion(@PathVariable Long surveyId, @ModelAttribute Question question, String optionsText) {
         Long groupId = question.getGroup().getId();
-        surveyService.createQuestion(question, groupId);
+        Question createdQuestion = surveyService.createQuestion(question, groupId);
+        
+        // If question type is OPTION and optionsText is provided, create options
+        if ("OPTION".equals(question.getType().toString()) && optionsText != null && !optionsText.trim().isEmpty()) {
+            String[] optionLines = optionsText.split("\\n");
+            for (String line : optionLines) {
+                String trimmedLine = line.trim();
+                if (!trimmedLine.isEmpty()) {
+                    QuestionOption option = new QuestionOption();
+                    option.setContent(trimmedLine);
+                    option.setQuestion(createdQuestion);
+                    surveyService.createOption(option, createdQuestion.getId());
+                }
+            }
+        }
+        
         return "redirect:/admin/survey/" + surveyId + "/questions";
     }
 
@@ -99,6 +171,39 @@ public class AdminController {
         Survey survey = surveyService.getSurveyById(id);
         model.addAttribute("survey", survey);
         return "admin/edit";
+    }
+
+    // --- User management (ADMIN) ---
+    @GetMapping("/users")
+    public String listUsers(Model model) {
+        model.addAttribute("users", userService.getAllUsers());
+        return "admin/users";
+    }
+
+    @GetMapping("/users/create")
+    public String createUserForm(Model model) {
+        model.addAttribute("user", new com.example.demo.entity.User());
+        model.addAttribute("roles", EnumSet.allOf(RoleCode.class));
+        return "admin/create-user";
+    }
+
+    @PostMapping("/users")
+    public String createUser(@ModelAttribute com.example.demo.entity.User user, String[] selectedRoles) {
+        Set<RoleCode> roleCodes = EnumSet.noneOf(RoleCode.class);
+        if (selectedRoles != null) {
+            for (String r : selectedRoles) {
+                try {
+                    roleCodes.add(RoleCode.valueOf(r));
+                } catch (Exception ex) {
+                    // ignore invalid
+                }
+            }
+        }
+        if (roleCodes.isEmpty()) {
+            roleCodes.add(RoleCode.MEMBER);
+        }
+        userService.createUser(user, roleCodes);
+        return "redirect:/admin/users";
     }
 
     @PostMapping("/edit-survey/{id}")

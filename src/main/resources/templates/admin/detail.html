@@ -152,16 +152,85 @@
                 <div class="col-lg-10 mx-auto">
                     <!-- Header -->
                     <div class="header-section d-flex justify-content-between align-items-center">
-                        <h2 th:text="${survey.title}"></h2>
-                        <div>
-                            <a href="/admin/dashboard" class="btn btn-back me-2"> <i class="fas fa-arrow-left me-2"></i>Quay Lại </a>
-                            <a th:href="@{/admin/survey/{id}/questions(id=${survey.id})}" class="btn btn-manage"> <i class="fas fa-list me-2"></i>Quản Lý Câu Hỏi </a>
+                        <a href="/admin/dashboard" class="btn btn-back me-2"> <i class="fas fa-arrow-left me-2"></i>Quay Lại </a>
+
+                        <div class="d-flex">
+                            <h2 th:text="${survey.title}" class="bg-transparent me-2"></h2>
                         </div>
+                        <div></div>
                     </div>
 
-                    <!-- Question Groups -->
+                    <!-- Assign Rules -->
                     <div>
-                        <h3 class="section-title"><i class="fas fa-layer-group"></i>Nhóm Câu Hỏi</h3>
+                        <h3 class="section-title"><i class="fas fa-shield-alt"></i>Quy Tắc Phân Công</h3>
+                        <p style="color: #d97706; font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Bước bắt buộc: Thêm quy tắc phân công trước khi thêm nhóm câu hỏi
+                        </p>
+
+                        <!-- List Assign Rules -->
+                        <div th:if="${assignRules.isEmpty()}" class="alert alert-empty" style="margin-bottom: 1.5rem;">
+                            <i class="fas fa-info-circle me-2"></i>Chưa có quy tắc phân công nào. Vui lòng thêm ít nhất một quy tắc.
+                        </div>
+                        <div class="groups-table" th:unless="${assignRules.isEmpty()}" style="margin-bottom: 1.5rem;">
+                            <table class="table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Loại Quy Tắc</th>
+                                        <th>Vai trò</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="rule : ${assignRules}">
+                                        <td><strong th:text="${rule.id}"></strong></td>
+                                        <td>
+                                            <span class="badge bg-primary" th:text="${rule.ruleType}"></span>
+                                        </td>
+                                        <td th:text="${rule.ruleValue ?: '(Tất cả người dùng)'}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Add Assign Rule Form -->
+                        <div class="form-card">
+                            <h5><i class="fas fa-plus-circle me-2"></i>Thêm Quy Tắc Phân Công</h5>
+                            <form method="post" th:action="@{/admin/survey/{surveyId}/assign-rule(surveyId=${survey.id})}">
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Loại Quy Tắc</label>
+                                            <select class="form-select" name="ruleType" id="ruleType" onchange="handleRuleTypeChange(this)" required>
+                                                <option value="">-- Chọn Loại --</option>
+                                                <option value="ALL">Tất cả người dùng (ALL)</option>
+                                                <option value="ROLE">Theo Vai Trò (ROLE)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Vai Trò</label>
+                                            <div id="ruleValueDiv" style="display: none;">
+                                                <select class="form-select" name="ruleValue" id="ruleValue">
+                                                    <option value="">-- Chọn Vai Trò --</option>
+                                                    <option value="MEMBER">MEMBER (Thành viên)</option>
+                                                    <option value="LEADER">LEADER (Trưởng nhóm)</option>
+                                                    <option value="PM">PM (Quản lý dự án)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn-submit"><i class="fas fa-plus me-2"></i>Thêm Quy Tắc</button>
+                            </form>
+                        </div>
+                    
+                        <hr style="margin: 2rem 0;" />
+                        <div class="d-flex justify-content-between">
+                            <h3 class="section-title"><i class="fas fa-layer-group"></i>Nhóm Câu Hỏi</h3>
+                        </div>
+
                         <div th:if="${surveyGroups.isEmpty()}" class="alert alert-empty"><i class="fas fa-info-circle me-2"></i>Chưa có nhóm câu hỏi nào được thêm</div>
                         <div class="groups-table" th:unless="${surveyGroups.isEmpty()}">
                             <table class="table mb-0">
@@ -169,7 +238,8 @@
                                     <tr>
                                         <th>Tên Nhóm</th>
                                         <th>Mã Nhóm</th>
-                                        <th>Vai Trò Mục Tiêu</th>
+                                        <th>Vai Trò</th>
+                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -179,14 +249,29 @@
                                         <td>
                                             <span class="badge bg-info" th:text="${sg.group.targetRole ?: 'Tất cả'}"></span>
                                         </td>
+                                        <td>
+                                            <a th:href="@{/admin/survey/{id}/questions(id=${survey.id})}" class="badge bg-primary text-decoration-none">Thêm</a>
+                                            <form
+                                                th:action="@{/survey/{surveyId}/group/{groupId}/delete(
+                                                                                                            surveyId=${survey.id},
+                                                                                                            groupId=${sg.group.id})}"
+                                                method="post"
+                                                style="display: inline"
+                                                onsubmit="return confirm('Xóa group khỏi survey này?');"
+                                            >
+                                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                                                <button type="submit" class="badge bg-danger border-0">Xóa</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    <!-- Add Question Group -->
                     <h3 class="section-title mt-4"><i class="fas fa-plus-circle"></i>Thêm Nhóm Câu Hỏi</h3>
+
 
                     <!-- Option 1: Select Existing Group -->
                     <div class="form-card">
@@ -231,7 +316,7 @@
                                 <textarea class="form-control" name="description" rows="2" placeholder="Nhập mô tả nhóm..."></textarea>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Vai Trò Mục Tiêu</label>
+                                <label class="form-label">Chức vụ</label>
                                 <select class="form-select" name="targetRole">
                                     <option value="">ALL</option>
                                     <option value="MEMBER">MEMBER</option>
@@ -242,12 +327,40 @@
                             <button type="submit" class="btn-submit"><i class="fas fa-save me-2"></i>Tạo và Thêm Nhóm</button>
                         </form>
                     </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div id="liveToastSuccess"
+                    class="toast text-bg-success show"
+                    th:if="${successMessage}">
+                    <div class="toast-body" th:text="${successMessage}"></div>
+                </div>
+            </div>
+
+            <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                <div id="liveToastError"
+                    class="toast text-bg-danger show"
+                    th:if="${error}">
+                    <div class="toast-body" th:text="${error}"></div>
                 </div>
             </div>
         </div>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script>
+            function handleRuleTypeChange(select) {
+                const ruleValueDiv = document.getElementById("ruleValueDiv");
+                if (select.value === "ROLE") {
+                    ruleValueDiv.style.display = "block";
+                    document.getElementById("ruleValue").required = true;
+                } else if (select.value === "ALL") {
+                    ruleValueDiv.style.display = "none";
+                    document.getElementById("ruleValue").required = false;
+                }
+            }
+
             document.getElementById("addGroupForm").addEventListener("submit", function (e) {
                 e.preventDefault();
                 const groupId = document.getElementById("groupSelect").value;
@@ -259,6 +372,17 @@
                 this.action = "/admin/survey/" + surveyId + "/add-group/" + groupId;
                 this.submit();
             });
+
+            setTimeout(() => {
+                const success = document.getElementById('liveToastSuccess')
+                const error = document.getElementById("liveToastError")
+                if (success){
+                    success.classList.remove('show')
+                }
+                if (error) {
+                    error.classList.remove('show')
+                }
+            }, 3000)
         </script>
     </body>
 </html>
