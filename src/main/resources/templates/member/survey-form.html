@@ -1,0 +1,560 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Làm Khảo Sát</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <style>
+            :root {
+                --primary-color: #2563eb;
+                --secondary-color: #1e40af;
+                --success-color: #059669;
+                --warning-color: #d97706;
+                --danger-color: #dc2626;
+                --light-bg: #f8fafc;
+                --border-color: #e2e8f0;
+            }
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background-color: var(--light-bg);
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                min-height: 100vh;
+            }
+
+            .navbar-custom {
+                background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+                box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+                padding: 1rem 0;
+            }
+
+            .navbar-brand {
+                font-weight: 700;
+                font-size: 1.5rem;
+                color: white !important;
+            }
+
+            .nav-user {
+                color: white;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .logout-btn {
+                background-color: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 6px;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-weight: 600;
+                margin-left: 1rem;
+            }
+
+            .logout-btn:hover {
+                background-color: rgba(255, 255, 255, 0.3);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .back-btn {
+                color: white;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .back-btn:hover {
+                color: white;
+                transform: translateX(-4px);
+            }
+
+            .container-custom {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 2rem 1rem;
+            }
+
+            .header-section {
+                background: white;
+                border-radius: 12px;
+                padding: 2rem;
+                margin-bottom: 2rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                border-left: 4px solid var(--primary-color);
+            }
+
+            .header-section h1 {
+                color: #1e293b;
+                font-weight: 700;
+                margin-bottom: 0.5rem;
+            }
+
+            .header-section p {
+                color: #64748b;
+                margin: 0;
+            }
+
+            .survey-progress {
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .progress-bar-custom {
+                height: 8px;
+                border-radius: 4px;
+                background-color: var(--light-bg);
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+                border-radius: 4px;
+                transition: width 0.3s ease;
+                width: 0%;
+            }
+
+            .progress-text {
+                font-size: 0.9rem;
+                color: #64748b;
+                margin-top: 0.5rem;
+                text-align: right;
+            }
+
+            .form-section {
+                background: white;
+                border-radius: 12px;
+                padding: 2rem;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid var(--primary-color);
+            }
+
+            .section-description {
+                color: #64748b;
+                font-size: 0.95rem;
+                margin-bottom: 1.5rem;
+                font-style: italic;
+            }
+
+            .question-item {
+                margin-bottom: 2rem;
+                padding-bottom: 2rem;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .question-item:last-child {
+                border-bottom: none;
+                margin-bottom: 0;
+                padding-bottom: 0;
+            }
+
+            .question-label {
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 1rem;
+                font-size: 1.05rem;
+            }
+
+            .required-badge {
+                color: var(--danger-color);
+                margin-left: 0.3rem;
+            }
+
+            .form-control-custom,
+            .form-check-input,
+            .form-select,
+            textarea {
+                border: 1px solid var(--border-color);
+                border-radius: 6px;
+                padding: 0.75rem;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+            }
+
+            .form-control-custom:focus,
+            .form-check-input:focus,
+            .form-select:focus,
+            textarea:focus {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+                outline: none;
+            }
+
+            textarea.form-control-custom {
+                resize: vertical;
+                min-height: 100px;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .option-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .form-check {
+                padding-left: 0;
+                margin-bottom: 0.75rem;
+            }
+
+            .form-check-input {
+                margin-top: 0.3rem;
+                margin-right: 0.75rem;
+                width: 20px;
+                height: 20px;
+                border: 2px solid var(--border-color);
+                cursor: pointer;
+            }
+
+            .form-check-input:checked {
+                background-color: var(--primary-color);
+                border-color: var(--primary-color);
+            }
+
+            .form-check-label {
+                margin-bottom: 0;
+                cursor: pointer;
+                user-select: none;
+                color: #1e293b;
+            }
+
+            .radio-option {
+                display: flex;
+                align-items: flex-start;
+            }
+
+            .radio-option input[type="radio"] {
+                margin-top: 0.3rem;
+                margin-right: 0.75rem;
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+            }
+
+            .radio-option label {
+                cursor: pointer;
+                margin: 0;
+                flex: 1;
+            }
+
+            .form-actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: space-between;
+                padding-top: 2rem;
+                border-top: 2px solid var(--border-color);
+                margin-top: 2rem;
+            }
+
+            .btn-custom {
+                padding: 0.8rem 2rem;
+                border-radius: 6px;
+                border: none;
+                font-weight: 600;
+                font-size: 1rem;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .btn-submit {
+                background-color: var(--primary-color);
+                color: white;
+            }
+
+            .btn-submit:hover {
+                background-color: var(--secondary-color);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            }
+
+            .btn-submit:active {
+                transform: translateY(0);
+            }
+
+            .btn-cancel {
+                background-color: #e2e8f0;
+                color: #64748b;
+                text-decoration: none;
+            }
+
+            .btn-cancel:hover {
+                background-color: #cbd5e1;
+                color: #1e293b;
+            }
+
+            .alert-custom {
+                border-radius: 10px;
+                border: none;
+                padding: 1rem 1.5rem;
+                margin-bottom: 1.5rem;
+                animation: slideDown 0.3s ease-out;
+            }
+
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .alert-danger {
+                background-color: #fee2e2;
+                color: #7f1d1d;
+                border-left: 4px solid var(--danger-color);
+            }
+
+            .loading-spinner {
+                display: none;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 9999;
+                text-align: center;
+            }
+
+            .loading-spinner.show {
+                display: block;
+            }
+
+            .spinner-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 9998;
+            }
+
+            .spinner-overlay.show {
+                display: block;
+            }
+
+            @media (max-width: 768px) {
+                .header-section {
+                    padding: 1.5rem;
+                }
+
+                .form-section {
+                    padding: 1.5rem;
+                }
+
+                .form-actions {
+                    flex-direction: column-reverse;
+                }
+
+                .btn-custom {
+                    width: 100%;
+                    justify-content: center;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Navbar -->
+        <nav class="navbar navbar-custom">
+            <div class="container-fluid px-4">
+                <a href="/member/dashboard" class="back-btn"> <i class="fas fa-arrow-left"></i> Quay Lại </a>
+                <div class="nav-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span th:text="${user.fullName}"></span>
+                    <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container-custom">
+            <!-- Header -->
+            <div class="header-section">
+                <h1 th:text="${survey.title}"></h1>
+                <p th:text="${survey.description}"></p>
+                <div class="survey-progress">
+                    <div class="progress-bar-custom">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text"><span id="answeredCount">0</span> / <span id="totalCount">0</span> câu trả lời</div>
+                </div>
+            </div>
+
+            <!-- Alert for errors -->
+            <div th:if="${error}" class="alert alert-custom alert-danger"><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></div>
+
+            <!-- Survey Form -->
+            <form th:action="@{/member/submit/{surveyId}(surveyId=${survey.id})}" method="post" id="surveyForm">
+                <div th:each="groupEntry : ${groupedQuestions.entrySet()}" class="form-section">
+                    <!-- Section Header -->
+                    <h2 class="section-title" th:text="${groupEntry.key.name}"></h2>
+                    <p class="section-description" th:if="${groupEntry.key.description}" th:text="${groupEntry.key.description}"></p>
+
+                    <!-- Questions in this section -->
+                    <div th:each="question : ${groupEntry.value}" class="question-item">
+                        <!-- Question Label -->
+                        <label class="question-label">
+                            <span th:text="${question.content}"></span>
+                            <span th:if="${question.required}" class="required-badge">*</span>
+                        </label>
+
+                        <!-- Text Input (for TEXT type) -->
+                        <div th:if="${question.type == 'TEXT'}">
+                            <input type="text" th:name="'question_' + ${question.id}" class="form-control form-control-custom" th:required="${question.required}" placeholder="Nhập câu trả lời của bạn" maxlength="500" />
+                        </div>
+
+                        <!-- Yes/No Radio Buttons (for YES_NO type) -->
+                        <div th:if="${question.type.name() == 'YES_NO'}" class="option-group">
+                            <div class="radio-option">
+                                <input type="radio" th:id="'option_yes_' + ${question.id}" th:name="'question_' + ${question.id}" value="yes" th:required="${question.required}" class="form-check-input question-input" />
+                                <label th:for="'option_yes_' + ${question.id}" class="form-check-label">Có</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" th:id="'option_no_' + ${question.id}" th:name="'question_' + ${question.id}" value="no" th:required="${question.required}" class="form-check-input question-input" />
+                                <label th:for="'option_no_' + ${question.id}" class="form-check-label">Không</label>
+                            </div>
+                        </div>
+
+                        <!-- Options (for OPTION type) -->
+                        <div th:if="${question.type == 'OPTION'}" class="option-group">
+                            <div th:each="option : ${question.options}" class="radio-option">
+                                <input type="radio" th:id="'option_' + ${option.id}" th:name="'question_' + ${question.id}" th:value="${option.id}" th:required="${question.required}" class="form-check-input question-input" />
+                                <label th:for="'option_' + ${option.id}" class="form-check-label" th:text="${option.content}"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <a href="/member/dashboard" class="btn btn-custom btn-cancel"> <i class="fas fa-times"></i> Hủy </a>
+                    <button type="submit" class="btn btn-custom btn-submit" id="submitBtn"><i class="fas fa-check"></i> Gửi Khảo Sát</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="spinner-overlay" id="spinnerOverlay"></div>
+        <div class="loading-spinner" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang xử lý...</span>
+            </div>
+            <p class="mt-3 text-primary">Đang gửi khảo sát...</p>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const form = document.getElementById("surveyForm");
+                const submitBtn = document.getElementById("submitBtn");
+                const spinnerOverlay = document.getElementById("spinnerOverlay");
+                const loadingSpinner = document.getElementById("loadingSpinner");
+                const progressFill = document.getElementById("progressFill");
+                const answeredCount = document.getElementById("answeredCount");
+                const questionInputs = document.querySelectorAll(".question-input");
+
+                // Update progress bar
+                function updateProgress() {
+                    const totalInputs = questionInputs.length;
+                    let answeredInputs = 0;
+
+                    questionInputs.forEach((input) => {
+                        if (input.type === "checkbox") {
+                            // For checkboxes, check if any is selected
+                            const groupName = input.name;
+                            if (document.querySelector(`input[name="${groupName}"]:checked`)) {
+                                answeredInputs++;
+                            }
+                        } else if (input.type === "radio") {
+                            // For radios, check if any is selected in the group
+                            const groupName = input.name;
+                            if (!document.querySelector(`input[name="${groupName}"]:checked`)) {
+                                // Not checked
+                            } else {
+                                answeredInputs++;
+                            }
+                        } else {
+                            // For text inputs
+                            if (input.value.trim() !== "") {
+                                answeredInputs++;
+                            }
+                        }
+                    });
+
+                    const percentage = totalInputs > 0 ? (answeredInputs / totalInputs) * 100 : 0;
+                    progressFill.style.width = percentage + "%";
+                    answeredCount.textContent = Math.floor(answeredInputs / 2); // Adjust count for radio/checkbox groups
+                }
+
+                // Listen to all inputs for changes
+                questionInputs.forEach((input) => {
+                    input.addEventListener("change", updateProgress);
+                    input.addEventListener("input", updateProgress);
+                });
+
+                // Also handle select changes
+                document.querySelectorAll("select").forEach((select) => {
+                    select.addEventListener("change", updateProgress);
+                });
+
+                // Initialize total count
+                const uniqueQuestions = new Set();
+                questionInputs.forEach((input) => {
+                    uniqueQuestions.add(input.name);
+                });
+                document.querySelectorAll("select").forEach((select) => {
+                    uniqueQuestions.add(select.name);
+                });
+                document.getElementById("totalCount").textContent = uniqueQuestions.size;
+
+                // Handle form submission
+                form.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    // Show loading spinner
+                    spinnerOverlay.classList.add("show");
+                    loadingSpinner.classList.add("show");
+                    submitBtn.disabled = true;
+
+                    // Submit form after a short delay
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                });
+
+                // Initialize progress on page load
+                updateProgress();
+            });
+        </script>
+    </body>
+</html>

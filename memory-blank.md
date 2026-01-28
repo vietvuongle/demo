@@ -480,7 +480,7 @@ DECLARE v_cnt INT;
         UNION
 
 -- 5.2) ROLE -> user có role tương ứng (ACTIVE)
-SELECT DISTINCT usr.id AS user_idsp_approve_survey
+SELECT DISTINCT usr.id AS user_id
 FROM survey_assign_rule sar
 JOIN roles r ON r.code = sar.rule_value
 JOIN user_role ur ON ur.role_id = r.id

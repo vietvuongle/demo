@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.User;
 import com.example.demo.enums.RoleCode;
+import com.example.demo.enums.UserStatus;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 
@@ -35,6 +36,7 @@ public class UserService {
     public User createUser(User user, Set<RoleCode> roleCodes) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setCreatedAt(LocalDateTime.now());
+        user.setStatus(UserStatus.ACTIVE);
         for (RoleCode code : roleCodes) {
             roleRepository.findByCode(code).ifPresent(role -> user.getRoles().add(role));
         }

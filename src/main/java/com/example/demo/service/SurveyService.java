@@ -123,7 +123,6 @@ public class SurveyService {
         return surveyRepository.findByStatus(SurveyStatus.APPROVED);
     }
 
-    @Transactional
     public void approveSurvey(Long surveyId, User pm) {
         try {
             StoredProcedureQuery query = entityManager.createStoredProcedureQuery("sp_approve_survey");
